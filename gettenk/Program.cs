@@ -48,7 +48,7 @@ namespace gettenk
 
             try
             {
-                Console.WriteLine("parsing...");
+                /*Console.WriteLine("parsing...");
                 Ink.Parsed.Story flow = p.Parse();
                 Console.WriteLine("done!");
                 if (flow == null)
@@ -57,7 +57,34 @@ namespace gettenk
                     return;
                 }
                 WalkObj(flow);
-
+                */
+                Ink.Parsed.Story flow = p.Parse();
+                InkToLocalizeLines ll = new InkToLocalizeLines();
+                ll.GatherLines(flow);
+                foreach(LocalizedLine l in ll.lines)
+                {
+                    if (!string.IsNullOrEmpty(l.filename))
+                    {
+                        Console.Write("#: ");
+                        Console.Write(l.filename);
+                        Console.Write(": ");
+                        Console.Write(l.line.ToString());
+                        Console.WriteLine();
+                    }
+                    Console.Write("msgid \"");
+                    Console.Write(l.text);
+                    Console.Write("\"");
+                    Console.WriteLine();
+                    Console.Write("msgstr \"\"");
+                    Console.WriteLine();
+                    Console.WriteLine();
+                }
+                /*
+#: ..\Storage\Dev\GitHub\Other\NGettext\examples\Examples.HelloForms\Form1.cs:
+#, csharp-format
+msgid "{0} (non contextual)"
+msgstr ""                 
+                 */
             }
             catch (Exception x)
             {

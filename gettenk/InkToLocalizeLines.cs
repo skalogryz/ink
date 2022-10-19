@@ -8,27 +8,39 @@ namespace gettenk
 {
     public class LocalizedLine
     {
-        public string line;
+        public string text;
+        public string filename;
+        public int line;
         public List<Ink.Parsed.Object> objects = new List<Ink.Parsed.Object>();
     }
 
     public class InkToLocalizeLines
     {
-        List<LocalizedLine> lines = new List<LocalizedLine>();
+        public List<LocalizedLine> lines = new List<LocalizedLine>();
 
-        private void GatherSimple(Object obj)
+        private LocalizedLine lastLine;
+
+        private void GatherSimple(Ink.Parsed.Object obj)
         {
             if (obj == null) return;
             if ((obj is Text t) && (!string.IsNullOrWhiteSpace(t.text)))
             {
+                LocalizedLine ll = new LocalizedLine();
+                lines.Add(ll);
+                lastLine = ll;
+
                 if (t.hasOwnDebugMetadata)
                 {
+                    ll.filename = t.debugMetadata.fileName;
+                    ll.line = t.debugMetadata.startLineNumber;
                 }
+                ll.text = t.text;
+                ll.objects.Add(t);
             }
             if (obj.content != null)
             {
                 foreach (Ink.Parsed.Object sub in obj.content)
-                    WalkObj(sub, pfx + "  ");
+                    GatherSimple(sub);
             }
         }
 
