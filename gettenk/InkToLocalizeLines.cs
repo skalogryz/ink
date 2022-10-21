@@ -12,6 +12,8 @@ namespace gettenk
         public string filename;
         public int line;
         public List<Ink.Parsed.Object> objects = new List<Ink.Parsed.Object>();
+        public bool isAnswerOption;
+        public string extraInfo;
     }
 
     public class InkToLocalizeLines
@@ -19,33 +21,100 @@ namespace gettenk
         public List<LocalizedLine> lines = new List<LocalizedLine>();
 
         private LocalizedLine lastLine;
+        private bool hasGlue;
+        private bool glueAll; // is used for answers
+
+        private string startFile = "";
+        public bool OnlyStartFile = false;
+
+        private void GatherSimple(List<Ink.Parsed.Object> content)
+        {
+            if (content == null) return;
+            for (int i = 0; i < content.Count; i++)
+                GatherSimple(content[i]);
+        }
 
         private void GatherSimple(Ink.Parsed.Object obj)
         {
             if (obj == null) return;
-            if ((obj is Text t) && (!string.IsNullOrWhiteSpace(t.text)))
+            if ((OnlyStartFile)
+                && (obj.debugMetadata != null)
+                && (startFile != null)
+                && (startFile != obj.debugMetadata.fileName))
+                return;
+
+            bool goToContent = true;
+
+            if ((obj is Text t))
             {
-                LocalizedLine ll = new LocalizedLine();
-                lines.Add(ll);
+                if (string.IsNullOrWhiteSpace(t.text)) return;
+
+                LocalizedLine ll;
+                if ((hasGlue) && (lastLine != null))
+                {
+                    ll = lastLine;
+                    if (!glueAll) hasGlue = false;
+                }
+                else
+                {
+                    ll = new LocalizedLine();
+                    lines.Add(ll);
+                    if (t.hasOwnDebugMetadata)
+                    {
+                        ll.filename = t.debugMetadata.fileName;
+                        ll.line = t.debugMetadata.startLineNumber;
+                    }
+                }
                 lastLine = ll;
 
-                if (t.hasOwnDebugMetadata)
-                {
-                    ll.filename = t.debugMetadata.fileName;
-                    ll.line = t.debugMetadata.startLineNumber;
-                }
-                ll.text = t.text;
+                if (ll.text == "") ll.text = t.text;
+                else ll.text += t.text;
                 ll.objects.Add(t);
-            }
-            if (obj.content != null)
+            } else if (obj is Choice ch)
             {
-                foreach (Ink.Parsed.Object sub in obj.content)
-                    GatherSimple(sub);
+                goToContent = false;
+
+                lastLine = null;
+                if (ch.choiceOnlyContent != null)
+                {
+                    int i = lines.Count;
+                    GatherSimple(ch.choiceOnlyContent);
+                    for (int j = i; j < lines.Count; j++)
+                        lines[j].isAnswerOption = true;
+                    lastLine = null;
+                }
+                if (ch.startContent != null)
+                {
+                    bool tGlue = hasGlue;
+
+                    // the entire text line
+                    hasGlue = true;
+                    glueAll = true;
+                    try
+                    {
+                        if (ch.content != null) GatherSimple(ch.content);
+                    }
+                    finally
+                    {
+                        glueAll = false;
+                        hasGlue = tGlue;
+                    }
+                }
             }
+            else if (obj is Glue)
+                hasGlue = true;
+
+            if (goToContent)
+                GatherSimple(obj.content);
         }
 
         public void GatherLines(Story parsedStory)
         {
+            if (parsedStory == null) return;
+            if (parsedStory.debugMetadata != null)
+            {
+                startFile = parsedStory.debugMetadata.fileName;
+            }
             GatherSimple(parsedStory);
         }
     }
