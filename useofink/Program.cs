@@ -68,6 +68,21 @@ namespace useofink
                 if (AllParams) return true;
                 return (prm.IndexOf(idx) >= 0);
             }
+
+            public bool ParseNameArgs(string nameArgs)
+            {
+                string[] na = nameArgs.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                if (na.Length == 0) return false;
+
+                funcName = na[0];
+                if (na.Length == 1)
+                {
+                    AllParams = true;
+                    return true;
+                }
+                AllParams = !IsParamsNum(na[1], prm);
+                return true;
+            }
         }
 
         static void GatherParams(FuncTrack ft, FunctionCall fc)
@@ -199,25 +214,34 @@ namespace useofink
                         string fn = "";
                         if (i >= args.Length) break;
 
-                        fn = args[i];
+                        fn = args[i].Trim();
                         if (string.IsNullOrEmpty(fn))
                         {
                             i--;
                             break;
                         }
-                        FuncTrack ft = new FuncTrack();
-                        ft.funcName = fn;
-                        funcs[fn] = ft;
-
-                        int j = i + 1;
-                        if ((j < args.Length) && (IsParamsNum(args[j], ft.prm)))
+                        if (fn.IndexOf("@") < 0)
                         {
-                            i = j;
-                            ft.AllParams = false;
-                        }
+                            FuncTrack ft = new FuncTrack();
+                            ft.ParseNameArgs(fn);
+                            funcs[ft.funcName] = ft;
+                        } 
                         else
-                            ft.AllParams = true;
+                        {
+                            string fln = fn.Substring(1);
+                            string[] fnNames = File.ReadAllLines(fln, Encoding.UTF8);
+                            foreach (string funName in fnNames)
+                            {
+                                if (string.IsNullOrWhiteSpace(funName))
+                                    continue;
+                                FuncTrack ft = new FuncTrack();
+                                if (ft.ParseNameArgs(funName))
+                                    funcs[ft.funcName] = ft;
+                            }
+
+                        }
                         break;
+
                     default:
                         inputFn = arg;
                         break;
