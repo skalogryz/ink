@@ -8,13 +8,55 @@ namespace gettenk
     public static class i18utils
     {
 
+        public static bool IsEscapeChar(char c)
+        {
+            switch (c)
+            {
+                case '\\':
+                case '\"':
+                case '\r':
+                case '\t':
+                case '\n':
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        public static bool IsWhiteSpace(char c)
+        {
+            switch (c)
+            {
+                case ' ':
+                case '\r':
+                case '\t':
+                case '\n':
+                    return true;
+                default:
+                    return false;
+            }
+        }
+        public static bool NeedsEscape(string s)
+        {
+            int l = s.Length;
+            for (int i = 0; i < l; i++)
+                if (IsEscapeChar(s[i]))
+                    return true;
+            return false;
+        }
         public static string EscapeForPot(string s)
         {
             if (string.IsNullOrWhiteSpace(s)) 
                 return s;
-            int i = s.IndexOf("\"");
-            if (i >= 0)
-                return s.Replace("\"", "\\\"", StringComparison.InvariantCultureIgnoreCase);
+            if (NeedsEscape(s))
+            {
+                return
+                    s.Replace("\\", "\\\\", StringComparison.InvariantCulture)
+                    .Replace("\"", "\\\"", StringComparison.InvariantCulture)
+                    .Replace("\r", "\\r", StringComparison.InvariantCulture)
+                    .Replace("\t", "\\t", StringComparison.InvariantCulture)
+                    .Replace("\n", "\\n", StringComparison.InvariantCulture);
+            }
             else
                 return s;
         }
@@ -34,7 +76,7 @@ namespace gettenk
                 if (sub.Length == maxLen)
                 {
                     int j = sub.Length - 1;
-                    while ((j >= 0) && (sub[j] != ' ') && (sub[j] != '\t') && (sub[j] != '\r') && (sub[j] != '\n'))
+                    while ((j >= 0) && (!IsWhiteSpace(sub[j])))
                         j--;
                     if (j >= 0) 
                         sub = sub.Substring(0, j+1);
