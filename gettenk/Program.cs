@@ -207,7 +207,7 @@ options:
                 if (PrefixRemove.Count > 0)
                     RemovePrefix(PrefixRemove, ll, addPrefixAsExtraInfo);
 
-                if (outputFn != null)
+                if (!string.IsNullOrWhiteSpace(outputFn))
                 {
                     StringBuilder b = new StringBuilder();
                     foreach (LocalizedLine l in ll.lines)
