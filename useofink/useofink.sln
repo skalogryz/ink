@@ -1,0 +1,36 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.32228.343
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "useofink", "useofink.csproj", "{6ED70F63-BA82-43F8-A2A6-B96D6585207E}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ink-engine-runtime", "..\ink-engine-runtime\ink-engine-runtime.csproj", "{3622EB07-6161-47F3-91F6-BAFD32DB4972}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ink_compiler", "..\compiler\ink_compiler.csproj", "{10F32A77-0603-4312-8C3F-A0B8CB01CE8E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6ED70F63-BA82-43F8-A2A6-B96D6585207E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6ED70F63-BA82-43F8-A2A6-B96D6585207E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6ED70F63-BA82-43F8-A2A6-B96D6585207E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6ED70F63-BA82-43F8-A2A6-B96D6585207E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3622EB07-6161-47F3-91F6-BAFD32DB4972}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3622EB07-6161-47F3-91F6-BAFD32DB4972}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3622EB07-6161-47F3-91F6-BAFD32DB4972}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3622EB07-6161-47F3-91F6-BAFD32DB4972}.Release|Any CPU.Build.0 = Release|Any CPU
+		{10F32A77-0603-4312-8C3F-A0B8CB01CE8E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{10F32A77-0603-4312-8C3F-A0B8CB01CE8E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{10F32A77-0603-4312-8C3F-A0B8CB01CE8E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{10F32A77-0603-4312-8C3F-A0B8CB01CE8E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {058F72CB-02AB-4E02-A385-57940E2EEE66}
+	EndGlobalSection
+EndGlobal
