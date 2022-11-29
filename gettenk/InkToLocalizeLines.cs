@@ -10,8 +10,9 @@ namespace gettenk
     {
         public string text;
         public string filename;
+        public string langTag;
         public int line;
-        public List<Ink.Parsed.Object> objects = new List<Ink.Parsed.Object>();
+        public List<Ink.Parsed.Object> objects = new List<Ink.Parsed.Object>(); // Text objects that composte the "text" property
         public bool isAnswerOption;
         public string extraInfo;
     }
@@ -19,6 +20,7 @@ namespace gettenk
     public class InkToLocalizeLines
     {
         public List<LocalizedLine> lines = new List<LocalizedLine>();
+        public List<string> langTagPrefix = new List<string>();
 
         private LocalizedLine lastLine;
         private bool hasGlue;
@@ -31,11 +33,28 @@ namespace gettenk
 
         private bool InTag = false;
 
+        private string langTag = "";
+
         private void GatherSimple(List<Ink.Parsed.Object> content)
         {
             if (content == null) return;
             for (int i = 0; i < content.Count; i++)
                 GatherSimple(content[i]);
+        }
+
+
+        private void CheckTagPrefix(Text txt)
+        {
+            if (langTagPrefix.Count == 0) return;
+
+            string t = txt.text.Trim();
+            foreach (string p in langTagPrefix)
+            {
+                if (t.IndexOf(p, StringComparison.InvariantCultureIgnoreCase) != 0) 
+                    continue;
+                langTag = t;
+                break;
+            }
         }
 
         private void GatherSimple(Ink.Parsed.Object obj)
@@ -49,14 +68,26 @@ namespace gettenk
             if (tg != null)
             {
                 if (tg.isStart)
+                {
                     InTag = true;
+                    langTag = "";
+                }
                 else
+                {
                     InTag = false;
+                    if ((lastLine != null)&&(!string.IsNullOrEmpty(langTag)))
+                        lastLine.langTag = langTag;
+                    langTag = "";
+                }
                 return;
             }
 
-            if (InTag && SkipTags) 
+            if (InTag && SkipTags)
+            {
+                if (obj is Text)
+                    CheckTagPrefix((Text)obj);
                 return;
+            }
 
             if ((OnlyStartFile)
                 && (obj.debugMetadata != null)
@@ -71,6 +102,8 @@ namespace gettenk
             if ((obj is Text t))
             {
                 if (string.IsNullOrWhiteSpace(t.text)) return;
+
+                if (InTag) CheckTagPrefix(t);
 
                 LocalizedLine ll;
                 if ((hasGlue) && (lastLine != null))
@@ -93,6 +126,12 @@ namespace gettenk
                 if (ll.text == "") ll.text = t.text;
                 else ll.text += t.text;
                 ll.objects.Add(t);
+
+                if (!string.IsNullOrEmpty(langTag))
+                {
+                    ll.langTag = langTag;
+                    langTag = "";
+                }
             } else if (obj is Choice ch)
             {
                 goToContent = false;

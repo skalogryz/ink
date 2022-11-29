@@ -61,6 +61,7 @@ namespace gettenk
         static bool onlyInputFile = false;
         static bool skipExpression = false;
         static List<string> PrefixRemove = new List<string>();
+        static List<string> TagLangPrefix = new List<string>();
         static bool addPrefixAsExtraInfo = true;
         static string outputFn = "";
         static bool showHelp;
@@ -88,6 +89,11 @@ namespace gettenk
                         i++;
                         if (i < args.Length)
                             PrefixRemove.Add(args[i]);
+                        break;
+                    case "--langprefix":
+                        i++;
+                        if (i < args.Length)
+                            TagLangPrefix.Add(args[i]);
                         break;
                     case "-o":
                     case "--output":
@@ -117,11 +123,13 @@ options:
   -o, --output - the output file name. File is written in UTF8 encoding
                  if not specified, the file is written to stdout
   
-  --prefix     - the prefix symbol or substring used in strings.
+  --prefix %txt% - the prefix symbol or substring used in strings.
                  any text before prefix would be removed from the resulting translating string
                  However the text before prefix should not contain whitespace
 
   --skipexpr   - don't look for the lines in expressions (lines starting with ~)
+
+  --langprefix %txt% - the TAG prefix that is used to indicate the language transaltion Id.
   
   --alphabet   - the text must have some characters in order to translated
                  if the line consists only of numbers and non characters, it's skipped
@@ -212,6 +220,7 @@ options:
                 InkToLocalizeLines ll = new InkToLocalizeLines();
                 ll.OnlyStartFile = onlyInputFile;
                 ll.GoExpressions = !skipExpression;
+                ll.langTagPrefix.AddRange(TagLangPrefix);
                 ll.GatherLines(flow, inputFn);
 
                 if (PrefixRemove.Count > 0)
