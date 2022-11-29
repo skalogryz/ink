@@ -26,6 +26,10 @@ namespace gettenk
 
         private string startFile = "";
         public bool OnlyStartFile = false;
+        public bool GoExpressions = true;
+        public bool SkipTags = true;
+
+        private bool InTag = false;
 
         private void GatherSimple(List<Ink.Parsed.Object> content)
         {
@@ -37,11 +41,30 @@ namespace gettenk
         private void GatherSimple(Ink.Parsed.Object obj)
         {
             if (obj == null) return;
+
+            if ((obj is Expression) && (!GoExpressions))
+                return;
+
+            Tag tg = (obj as Tag);
+            if (tg != null)
+            {
+                if (tg.isStart)
+                    InTag = true;
+                else
+                    InTag = false;
+                return;
+            }
+
+            if (InTag && SkipTags) 
+                return;
+
             if ((OnlyStartFile)
                 && (obj.debugMetadata != null)
                 && (startFile != null)
                 && (startFile != obj.debugMetadata.fileName))
+            {
                 return;
+            }
 
             bool goToContent = true;
 
@@ -108,10 +131,11 @@ namespace gettenk
                 GatherSimple(obj.content);
         }
 
-        public void GatherLines(Story parsedStory)
+        public void GatherLines(Story parsedStory, string explicitStartFile)
         {
             if (parsedStory == null) return;
-            if (parsedStory.debugMetadata != null)
+            startFile = explicitStartFile;
+            if ((parsedStory.debugMetadata != null)&&(string.IsNullOrEmpty(startFile)))
             {
                 startFile = parsedStory.debugMetadata.fileName;
             }

@@ -59,6 +59,7 @@ namespace gettenk
         static bool showWhiteSpace = false;
         static string inputFn = "";
         static bool onlyInputFile = false;
+        static bool skipExpression = false;
         static List<string> PrefixRemove = new List<string>();
         static bool addPrefixAsExtraInfo = true;
         static string outputFn = "";
@@ -79,6 +80,9 @@ namespace gettenk
                         // only get the translation from the input file
                         // and ignore INCLUDE files
                         onlyInputFile = true;
+                        break;
+                    case "--skipexpr":
+                        skipExpression = true;
                         break;
                     case "--prefix":
                         i++;
@@ -116,7 +120,12 @@ options:
   --prefix     - the prefix symbol or substring used in strings.
                  any text before prefix would be removed from the resulting translating string
                  However the text before prefix should not contain whitespace
+
+  --skipexpr   - don't look for the lines in expressions (lines starting with ~)
   
+  --alphabet   - the text must have some characters in order to translated
+                 if the line consists only of numbers and non characters, it's skipped
+
   --onlyinput  - only gather strings from the %inputFile.ink%
                  this is used for multi-file scenarios (where INPUT is used)
   
@@ -202,7 +211,8 @@ options:
                 flow = p.Parse();
                 InkToLocalizeLines ll = new InkToLocalizeLines();
                 ll.OnlyStartFile = onlyInputFile;
-                ll.GatherLines(flow);
+                ll.GoExpressions = !skipExpression;
+                ll.GatherLines(flow, inputFn);
 
                 if (PrefixRemove.Count > 0)
                     RemovePrefix(PrefixRemove, ll, addPrefixAsExtraInfo);
