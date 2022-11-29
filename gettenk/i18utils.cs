@@ -88,6 +88,16 @@ namespace gettenk
         }
 
         public const int LineLen = 77;
+
+        public static string EstimateMsgId(this LocalizedLine l, bool useLangTag = true)
+        {
+            if (l == null) return "";
+            if ((useLangTag) && (!string.IsNullOrEmpty(l.langTag)))
+                return l.langTag;
+            else
+                return l.text.Trim();
+        }
+
         public static string ToPotString(this LocalizedLine l, bool useLangTag = true)
         {
             if (l == null) return "";

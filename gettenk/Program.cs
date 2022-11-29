@@ -179,6 +179,32 @@ options:
             }
         }
 
+        static int RemoveDuplicates(InkToLocalizeLines lines, List<LocalizedLine> removed = null)
+        {
+            Dictionary<string, LocalizedLine> used = new Dictionary<string, LocalizedLine>();
+            List<int> rm = new List<int>();
+            for (int i = 0; i < lines.lines.Count; i++)
+            {
+                LocalizedLine l = lines.lines[i];
+                string m = l.EstimateMsgId();
+                LocalizedLine p;
+                if (!used.TryGetValue(m, out p))
+                {
+                    used[m] = l;
+                    continue;
+                }
+                rm.Add(i);
+            }
+
+            for (int i = rm.Count-1; i>=0; i--)
+            {
+                int j = rm[i];
+                if (removed != null) removed.Add(lines.lines[j]);
+                lines.lines.RemoveAt(j);
+            }
+            return rm.Count;
+        }
+
         static void Main(string[] args)
         {
             if (args.Length == 0)
@@ -225,6 +251,10 @@ options:
 
                 if (PrefixRemove.Count > 0)
                     RemovePrefix(PrefixRemove, ll, addPrefixAsExtraInfo);
+
+                int r = RemoveDuplicates(ll);
+                if (r > 0)
+                    Console.WriteLine("removed duplicated: {0}", r);
 
                 if (!string.IsNullOrWhiteSpace(outputFn))
                 {
