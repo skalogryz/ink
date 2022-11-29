@@ -124,18 +124,20 @@ namespace gettenk
                 }
             }
 
-            if (l.text.Length <= LineLen)
+            string txt = l.text.Trim();
+
+            if (txt.Length <= LineLen)
             {
                 b.Append("msgid \"");
                 //75
-                b.Append(EscapeForPot(l.text));
+                b.Append(EscapeForPot(txt));
                 b.Append("\"");
                 b.AppendLine();
             }
             else
             {
                 b.AppendLine("msgid \"\"");
-                List<string> list = BreakUpLines(l.text);
+                List<string> list = BreakUpLines(txt);
                 foreach(string sub in list)
                 {
                     b.Append("\"");
