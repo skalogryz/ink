@@ -114,7 +114,7 @@ namespace gettenk
         static void PrintHelp()
         {
             Console.WriteLine(
-@" gettenk.exe [options] %inputFile.ink%
+@" gettenk.exe [options] %inputFile.ink% 111
 
 %inputFile.ink% - the input .ink file
 
@@ -170,12 +170,16 @@ options:
         static void RemovePrefix(List<string> pfx, InkToLocalizeLines lines, bool updateExtraInfo)
         {
             if ((pfx == null) || (pfx.Count == 0)) return;
-            foreach (LocalizedLine l in lines.lines)
+            //List<LocalizedLine> empty = new List<LocalizedLine>();
+            for (int i = lines.lines.Count-1; i >=0; i --)
             {
+                LocalizedLine l = lines.lines[i];
                 string cutpfx;
                 l.text = RemovePrefix(pfx, l.text, out cutpfx);
                 if (updateExtraInfo)
                     l.extraInfo += string.Format("prefix ({0})", cutpfx);
+                if (string.IsNullOrWhiteSpace(l.text))
+                    lines.lines.RemoveAt(i);
             }
         }
 
@@ -203,6 +207,17 @@ options:
                 lines.lines.RemoveAt(j);
             }
             return rm.Count;
+        }
+
+
+        static void AddPotHeader(StringBuilder b)
+        {
+            b.AppendLine("#, fuzzy");
+            b.AppendLine("msgid \"\"");
+            b.AppendLine("msgstr \"\"");
+            b.AppendLine("\"Content-Type: text/plain; charset=UTF-8\\n\"");
+            b.AppendLine("\"Content-Transfer-Encoding: 8bit\\n\"");
+            b.AppendLine();
         }
 
         static void Main(string[] args)
@@ -256,20 +271,16 @@ options:
                 if (r > 0)
                     Console.WriteLine("removed duplicated: {0}", r);
 
+                StringBuilder b = new StringBuilder();
+
+                AddPotHeader(b);
+
+                foreach (LocalizedLine l in ll.lines)
+                    b.AppendLine(l.ToPotString());
                 if (!string.IsNullOrWhiteSpace(outputFn))
-                {
-                    StringBuilder b = new StringBuilder();
-                    foreach (LocalizedLine l in ll.lines)
-                        b.AppendLine(l.ToPotString());
-                    File.WriteAllText(outputFn, b.ToString(), Encoding.UTF8);
-                }
+                    File.WriteAllText(outputFn, b.ToString(), new UTF8Encoding(false));
                 else
-                {
-                    foreach (LocalizedLine l in ll.lines)
-                    {
-                        Console.WriteLine(l.ToPotString());
-                    }
-                }
+                    Console.WriteLine(b.ToString());
             }
             catch (Exception x)
             {
