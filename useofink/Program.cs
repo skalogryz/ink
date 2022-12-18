@@ -117,15 +117,26 @@ namespace useofink
         {
             if (obj == null) return;
 
+
             if (obj is FunctionCall fc)
             {
-                //Console.Write(fc.name);
-                usedFuncs[fc.name] = true;
-                FuncTrack ft;
-                if (funcs.TryGetValue(fc.name, out ft))
+                bool gather = true;
+                if ((onlyInputFile)&&(obj.debugMetadata != null))
                 {
-                    GatherParams(ft, fc);
-                    //Console.WriteLine("... gathered.");
+                    gather = string.Compare(obj.debugMetadata.fileName, inputFn, true)==0;
+                    Console.WriteLine("gather={0} {1} {2}", gather, obj.debugMetadata.fileName, inputFn);
+                }
+
+                if (gather)
+                {
+                    //Console.Write(fc.name);
+                    usedFuncs[fc.name] = true;
+                    FuncTrack ft;
+                    if (funcs.TryGetValue(fc.name, out ft))
+                    {
+                        GatherParams(ft, fc);
+                        //Console.WriteLine("... gathered.");
+                    }
                 }
             }
 
@@ -257,6 +268,8 @@ namespace useofink
 %inputFile.ink% - the input .ink file
 
 options:
+
+  --fn         - name of the function to track the parameters of
 
   --walk       - don't try to produce result file, only produce the parsed structure
                  to stdout. (output file is not used)
