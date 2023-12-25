@@ -62,8 +62,11 @@ namespace gettenk
         static bool skipExpression = false;
         static List<string> PrefixRemove = new List<string>();
         static List<string> TagLangPrefix = new List<string>();
+        static List<string> PathsRemove = new List<string>();
         static bool addPrefixAsExtraInfo = true;
         static string outputFn = "";
+        static string procdll = "";
+        static string fn_optprintval = "";
         static bool showHelp;
 
         static void ParseArgs(string[] args)
@@ -95,6 +98,11 @@ namespace gettenk
                         if (i < args.Length)
                             TagLangPrefix.Add(args[i]);
                         break;
+                    case "--removelinepath":
+                        i++;
+                        if (i < args.Length) 
+                            PathsRemove.Add(args[i]);
+                        break;
                     case "-o":
                     case "--output":
                         i++;
@@ -104,6 +112,15 @@ namespace gettenk
                     case "--help":
                         showHelp = true;
                         break;
+                    case "--procdll":
+                        i++;
+                        if (i < args.Length) procdll = args[i];
+                        break;
+                    case "--fn_optvalue":
+                        i++;
+                        if (i < args.Length) fn_optprintval = args[i];
+                        break;
+                        
                     default:
                         inputFn = arg;
                         break;
@@ -114,13 +131,13 @@ namespace gettenk
         static void PrintHelp()
         {
             Console.WriteLine(
-@" gettenk.exe [options] %inputFile.ink% 111
+@" gettenk.exe [options] %inputFile.ink% 
 
 %inputFile.ink% - the input .ink file
 
 options:
 
-  -o, --output - the output file name. File is written in UTF8 encoding
+  -o, --output %fn% - the output file name. File is written in UTF8 encoding
                  if not specified, the file is written to stdout
   
   --prefix %txt% - the prefix symbol or substring used in strings.
@@ -139,7 +156,12 @@ options:
   
   --walk       - don't try to produce POT file, only prodcedure the parsed structure
                  to stdout. (output file is not used)
-  
+
+  --procdll    - the dll file to be loaded
+                        
+  --fn_optvalue - the classname and the method to be called for processing
+                 the option value to be processed
+
   -h, --help   - show this text
 ");
         }
@@ -165,6 +187,19 @@ options:
                 }
             }
             return ln;
+        }
+
+        static void RemoveFilePaths(List<string> rm, InkToLocalizeLines lines)
+        {
+            foreach(LocalizedLine ll in lines.lines)
+            {
+                foreach(string p in rm)
+                {
+                    int i = ll.filename.IndexOf(p, StringComparison.OrdinalIgnoreCase);
+                    if (i == 0)
+                        ll.filename = ll.filename.Substring(p.Length);
+                }
+            }
         }
 
         static void RemovePrefix(List<string> pfx, InkToLocalizeLines lines, bool updateExtraInfo)
@@ -266,6 +301,29 @@ options:
 
                 if (PrefixRemove.Count > 0)
                     RemovePrefix(PrefixRemove, ll, addPrefixAsExtraInfo);
+                if (PathsRemove.Count > 0)
+                    RemoveFilePaths(PathsRemove, ll);
+
+                LinesProcess lp;
+                if (!string.IsNullOrEmpty(procdll))
+                {
+                    DllProcess dll = new DllProcess();
+                    procdll = System.IO.Path.GetFullPath(procdll);
+                    dll.dll = procdll;
+                    dll.optvalfn = fn_optprintval;
+                    dll.LoadAsm();
+                    lp = dll;
+                 } else 
+                    lp = new LinesProcess();
+
+                foreach(LocalizedLine l in ll.lines)
+                {
+                    if (l.isAnswerOption)
+                        l.text = lp.OptValForPot(l.text);
+                    else
+                        l.text = lp.LineForPot(l.text);
+                }
+
 
                 int r = RemoveDuplicates(ll);
                 if (r > 0)

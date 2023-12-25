@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.32228.343
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "gettenk", "gettenk.csproj", "{6ED70F63-BA82-43F8-A2A6-B96D6585207E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "gettenk", "gettenk.csproj", "{6ED70F63-BA82-43F8-A2A6-B96D6585207E}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ink-engine-runtime", "..\ink-engine-runtime\ink-engine-runtime.csproj", "{3622EB07-6161-47F3-91F6-BAFD32DB4972}"
 EndProject
